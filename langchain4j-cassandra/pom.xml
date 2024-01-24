@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <astra-sdk.version>0.6.11</astra-sdk.version>
+        <astra-sdk.version>0.7.0</astra-sdk.version>
     </properties>
 
     <dependencies>
