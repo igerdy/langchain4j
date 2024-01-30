@@ -31,6 +31,7 @@ import io.milvus.param.dml.SearchParam;
 import io.milvus.response.SearchResultsWrapper;
 import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -193,6 +194,34 @@ public String add(Embedding embedding, String partitionName) {
             .collect(toList());
 
     return new EmbeddingSearchResult<>(result);
+  }
+
+  public void deleteByIds(List<String> primaryIds) {
+        delete(milvusClient, collectionName, primaryIds);
+    }
+
+  public void releaseCollection() {
+    if (!hasCollection(milvusClient, collectionName)) {
+      return;
+    }
+    releaseCollectionInMemory(milvusClient, collectionName);
+  }
+
+  public void deleteCollection() {
+    if (!hasCollection(milvusClient, collectionName)) {
+      return;
+    }
+    dropIndex(milvusClient, collectionName);
+    dropCollection(collectionName);
+  }
+
+  public void deletePartition(String partitionName) {
+    if (!hasPartition(milvusClient, collectionName, partitionName)) {
+      return;
+    }
+    releasePartitionsInMemory(milvusClient, collectionName, Collections.singletonList(partitionName));
+    dropPartition(milvusClient, collectionName, partitionName);
+    flush(milvusClient, collectionName);
   }
 
   private void addInternal(String id, Embedding embedding, TextSegment textSegment) {

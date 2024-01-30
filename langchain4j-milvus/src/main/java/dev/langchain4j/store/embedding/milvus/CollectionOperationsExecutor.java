@@ -14,9 +14,14 @@ import io.milvus.param.collection.*;
 import io.milvus.param.dml.InsertParam;
 import io.milvus.param.dml.QueryParam;
 import io.milvus.param.dml.SearchParam;
+import io.milvus.param.highlevel.dml.DeleteIdsParam;
+import io.milvus.param.highlevel.dml.response.DeleteResponse;
 import io.milvus.param.index.CreateIndexParam;
+import io.milvus.param.index.DropIndexParam;
 import io.milvus.param.partition.CreatePartitionParam;
+import io.milvus.param.partition.DropPartitionParam;
 import io.milvus.param.partition.HasPartitionParam;
+import io.milvus.param.partition.ReleasePartitionsParam;
 import io.milvus.response.QueryResultsWrapper;
 import io.milvus.response.SearchResultsWrapper;
 
@@ -112,15 +117,53 @@ class CollectionOperationsExecutor {
         checkResponseNotFailed(response);
     }
 
+    static void dropIndex(MilvusServiceClient milvusClient, String collectionName) {
+        dropIndex(milvusClient, collectionName, null);
+    }
+
+    static void dropIndex(MilvusServiceClient milvusClient, String collectionName, String indexName) {
+        DropIndexParam request = buildDropIndexRequest(collectionName, indexName);
+        R<RpcStatus> response = milvusClient.dropIndex(request);
+        checkResponseNotFailed(response);
+    }
+
+    static void dropPartition(MilvusServiceClient milvusClient, String collectionName, String partitionName) {
+        DropPartitionParam request = buildDropPartitionRequest(collectionName, partitionName);
+        R<RpcStatus> response = milvusClient.dropPartition(request);
+        checkResponseNotFailed(response);
+    }
+
+    static void insert(MilvusServiceClient milvusClient, String collectionName, List<InsertParam.Field> fields) {
+        insert(milvusClient, collectionName, fields, null);
+    }
+
     static void insert(MilvusServiceClient milvusClient, String collectionName, List<InsertParam.Field> fields, String partitionName) {
         InsertParam request = buildInsertRequest(collectionName, fields, partitionName);
         R<MutationResult> response = milvusClient.insert(request);
         checkResponseNotFailed(response);
     }
 
+    static void delete(MilvusServiceClient milvusClient, String collectionName, List<String> primaryIds) {
+        DeleteIdsParam request = buildDeleteByIdsRequest(collectionName, primaryIds);
+        R<DeleteResponse> response = milvusClient.delete(request);
+        checkResponseNotFailed(response);
+    }
+
     static void loadCollectionInMemory(MilvusServiceClient milvusClient, String collectionName) {
         LoadCollectionParam request = buildLoadCollectionInMemoryRequest(collectionName);
         R<RpcStatus> response = milvusClient.loadCollection(request);
+        checkResponseNotFailed(response);
+    }
+
+    static void releaseCollectionInMemory(MilvusServiceClient milvusClient, String collectionName) {
+        ReleaseCollectionParam request = buildReleaseCollectionInMemoryRequest(collectionName);
+        R<RpcStatus> response = milvusClient.releaseCollection(request);
+        checkResponseNotFailed(response);
+    }
+
+    static void releasePartitionsInMemory(MilvusServiceClient milvusClient, String collectionName, List<String> partitionNames) {
+        ReleasePartitionsParam request = buildReleasePartitionsInMemoryRequest(collectionName, partitionNames);
+        R<RpcStatus> response = milvusClient.releasePartitions(request);
         checkResponseNotFailed(response);
     }
 

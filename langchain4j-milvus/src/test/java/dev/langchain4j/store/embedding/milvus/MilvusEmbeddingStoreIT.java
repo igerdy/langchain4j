@@ -86,6 +86,7 @@ class MilvusEmbeddingStoreIT extends EmbeddingStoreWithFilteringIT {
         Embedding secondEmbedding = embeddingModel.embed("hi").content();
 
         String partitionName = "partition_" + randomUUID().replace("-", "");
+        embeddingStore.createPartition(partitionName);
         embeddingStore.addAll(asList(firstEmbedding, secondEmbedding), partitionName);
 
         EmbeddingSearchRequest embeddingSearchRequest = EmbeddingSearchRequest.builder()
@@ -99,6 +100,106 @@ class MilvusEmbeddingStoreIT extends EmbeddingStoreWithFilteringIT {
         assertThat(relevant).hasSize(2);
         assertThat(relevant.get(0).embedding()).isNull();
         assertThat(relevant.get(1).embedding()).isNull();
+    }
+
+
+    @Test
+    void should_use_deleteByIds() {
+        String collectionName = "collection_" + randomUUID().replace("-", "");
+        MilvusEmbeddingStore embeddingStore = MilvusEmbeddingStore.builder()
+                .host(milvus.getHost())
+                .port(milvus.getMappedPort(19530))
+                .collectionName(collectionName)
+                .dimension(384)
+                .retrieveEmbeddingsOnSearch(false)
+                .build();
+
+        Embedding firstEmbedding = embeddingModel.embed("hello").content();
+        Embedding secondEmbedding = embeddingModel.embed("hi").content();
+        List<String> ids = embeddingStore.addAll(asList(firstEmbedding, secondEmbedding));
+        assertThat(ids).isNotNull();
+
+        embeddingStore.deleteByIds(ids);
+
+    }
+
+    @Test
+    void should_use_releaseCollection() {
+        String collectionName = "collection_" + randomUUID().replace("-", "");
+        MilvusEmbeddingStore embeddingStore = MilvusEmbeddingStore.builder()
+                .host(milvus.getHost())
+                .port(milvus.getMappedPort(19530))
+                .collectionName(collectionName)
+                .dimension(384)
+                .retrieveEmbeddingsOnSearch(false)
+                .build();
+
+        Embedding firstEmbedding = embeddingModel.embed("hello").content();
+        Embedding secondEmbedding = embeddingModel.embed("hi").content();
+        embeddingStore.addAll(asList(firstEmbedding, secondEmbedding));
+
+        embeddingStore.releaseCollection();
+
+    }
+
+    @Test
+    void should_use_deleteCollection() {
+        String collectionName = "collection_" + randomUUID().replace("-", "");
+        MilvusEmbeddingStore embeddingStore = MilvusEmbeddingStore.builder()
+                .host(milvus.getHost())
+                .port(milvus.getMappedPort(19530))
+                .collectionName(collectionName)
+                .dimension(384)
+                .retrieveEmbeddingsOnSearch(false)
+                .build();
+
+        Embedding firstEmbedding = embeddingModel.embed("hello").content();
+        Embedding secondEmbedding = embeddingModel.embed("hi").content();
+        embeddingStore.addAll(asList(firstEmbedding, secondEmbedding));
+
+        embeddingStore.deleteCollection();
+
+    }
+
+    @Test
+    void should_use_deletePartition() {
+        String collectionName = "collection_" + randomUUID().replace("-", "");
+        MilvusEmbeddingStore embeddingStore = MilvusEmbeddingStore.builder()
+                .host(milvus.getHost())
+                .port(milvus.getMappedPort(19530))
+                .collectionName(collectionName)
+                .dimension(384)
+                .retrieveEmbeddingsOnSearch(false)
+                .build();
+
+        Embedding firstEmbedding = embeddingModel.embed("hello").content();
+        Embedding secondEmbedding = embeddingModel.embed("hi").content();
+        embeddingStore.addAll(asList(firstEmbedding, secondEmbedding));
+
+        String partitionName = "partition_" + randomUUID().replace("-", "");
+        embeddingStore.deletePartition(partitionName);
+
+    }
+
+    @Test
+    void should_use_deletePartition_init_partitionName() {
+        String collectionName = "collection_" + randomUUID().replace("-", "");
+        String partitionName = "partition_" + randomUUID().replace("-", "");
+        MilvusEmbeddingStore embeddingStore = MilvusEmbeddingStore.builder()
+                .host(milvus.getHost())
+                .port(milvus.getMappedPort(19530))
+                .collectionName(collectionName)
+                .dimension(384)
+                .retrieveEmbeddingsOnSearch(false)
+                .build();
+
+        Embedding firstEmbedding = embeddingModel.embed("hello").content();
+        Embedding secondEmbedding = embeddingModel.embed("hi").content();
+        embeddingStore.createPartition(partitionName);
+        embeddingStore.addAll(asList(firstEmbedding, secondEmbedding));
+
+        embeddingStore.deletePartition(partitionName);
+
     }
 
 }
