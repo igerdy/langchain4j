@@ -44,7 +44,7 @@
         <opensearch-containers.version>2.0.1</opensearch-containers.version>
         <elastic.version>8.9.0</elastic.version>
         <jackson.version>2.16.1</jackson.version>
-        <jedis.version>5.0.0</jedis.version>
+        <jedis.version>5.1.2</jedis.version>
         <aws.java.sdk.version>2.21.44</aws.java.sdk.version>
         <github-api.version>1.318</github-api.version>
         <netty.version>4.1.104.Final</netty.version>
