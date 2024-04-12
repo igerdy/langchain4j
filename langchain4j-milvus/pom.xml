@@ -13,7 +13,7 @@
 
     <artifactId>langchain4j-milvus</artifactId>
     <name>LangChain4j :: Integration :: Milvus</name>
-    <version>0.29.1-tmCloud-SNAPSHOT</version>
+    <version>0.29.1-plus-SNAPSHOT</version>
 
     <properties>
         <skipMilvusITs>false</skipMilvusITs>
