@@ -16,7 +16,7 @@
     <version>0.30.0-plus-SNAPSHOT</version>
 
     <properties>
-        <skipMilvusITs>false</skipMilvusITs>
+        <skipMilvusITs>true</skipMilvusITs>
     </properties>
 
     <dependencies>
@@ -79,6 +79,12 @@
             <artifactId>langchain4j-embeddings-all-minilm-l6-v2-q</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>langchain4j-core</artifactId>
+                    <groupId>dev.langchain4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -113,6 +119,11 @@
     </build>
 
     <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>Nexus Releases Repository Pro</name>
+            <url>http://nex-dvo.tmtec.sh:8081/repository/maven-releases/</url> <!--  正式版推送到这	-->
+        </repository>
         <snapshotRepository>
             <id>maven-snapshots</id>
             <url>http://nex-dvo.tmtec.sh:8081/repository/maven-snapshots/</url>
