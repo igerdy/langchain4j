@@ -113,13 +113,13 @@ class MilvusEmbeddingStoreIT extends EmbeddingStoreWithFilteringIT {
                 .dimension(384)
                 .retrieveEmbeddingsOnSearch(false)
                 .build();
-
+        String partitionName = "partition_" + randomUUID().replace("-", "");
         Embedding firstEmbedding = embeddingModel.embed("hello").content();
         Embedding secondEmbedding = embeddingModel.embed("hi").content();
-        List<String> ids = embeddingStore.addAll(asList(firstEmbedding, secondEmbedding));
+        List<String> ids = embeddingStore.addAll(asList(firstEmbedding, secondEmbedding), partitionName);
         assertThat(ids).isNotNull();
 
-        embeddingStore.deleteByIds(ids);
+        embeddingStore.deleteByIds(partitionName, ids);
 
     }
 

@@ -143,8 +143,8 @@ class CollectionOperationsExecutor {
         checkResponseNotFailed(response);
     }
 
-    static void delete(MilvusServiceClient milvusClient, String collectionName, List<String> primaryIds) {
-        DeleteIdsParam request = buildDeleteByIdsRequest(collectionName, primaryIds);
+    static void delete(MilvusServiceClient milvusClient, String collectionName, String partitionName, List<String> primaryIds) {
+        DeleteIdsParam request = buildDeleteByIdsRequest(collectionName, partitionName, primaryIds);
         R<DeleteResponse> response = milvusClient.delete(request);
         checkResponseNotFailed(response);
     }

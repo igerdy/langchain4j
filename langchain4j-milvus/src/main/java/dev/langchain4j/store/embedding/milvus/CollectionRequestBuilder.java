@@ -93,11 +93,14 @@ class CollectionRequestBuilder {
         return builder.build();
     }
 
-    static DeleteIdsParam buildDeleteByIdsRequest(String collectionName, List<String> primaryIds) {
-        return DeleteIdsParam.newBuilder()
+    static DeleteIdsParam buildDeleteByIdsRequest(String collectionName, String partitionName, List<String> primaryIds) {
+        DeleteIdsParam.Builder builder = DeleteIdsParam.newBuilder()
                 .withCollectionName(collectionName)
-                .withPrimaryIds(primaryIds)
-                .build();
+                .withPrimaryIds(primaryIds);
+        if (StringUtils.isNotEmpty(partitionName)) {
+            builder.withPartitionName(partitionName);
+        }
+        return builder.build();
     }
 
     static LoadCollectionParam buildLoadCollectionInMemoryRequest(String collectionName) {
