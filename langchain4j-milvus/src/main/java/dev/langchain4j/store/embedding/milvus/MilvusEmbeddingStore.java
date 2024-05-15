@@ -208,6 +208,13 @@ public String add(Embedding embedding, String partitionName) {
     releaseCollectionInMemory(milvusClient, collectionName);
   }
 
+    public void loadCollection() {
+    if (!hasCollection(milvusClient, collectionName)) {
+      return;
+    }
+    loadCollectionInMemory(milvusClient, collectionName);
+  }
+
   public void deleteCollection() {
     if (!hasCollection(milvusClient, collectionName)) {
       return;
