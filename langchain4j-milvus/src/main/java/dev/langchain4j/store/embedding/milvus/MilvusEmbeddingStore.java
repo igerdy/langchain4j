@@ -220,7 +220,6 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
         if (!hasCollection(milvusClient, collectionName)) {
             return;
         }
-        // TODO ? dropIndex(milvusClient, collectionName);
         dropCollection(collectionName);
     }
 
@@ -230,7 +229,6 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
         }
         releasePartitionsInMemory(milvusClient, collectionName, Collections.singletonList(partitionName));
         dropPartition(milvusClient, collectionName, partitionName);
-        // TODO flush(milvusClient, collectionName);
     }
 
     public void flushCollectionName() {
@@ -238,8 +236,16 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     }
 
     public GetLoadStateResponse getLoadState(List<String> partitionNames) {
-        return loadState(milvusClient, collectionName, partitionNames);
+        return this.getLoadState(collectionName, partitionNames);
     }
+
+    public GetLoadStateResponse getLoadState(String collectionNm, List<String> partitionNames) {
+        if (StringUtils.isEmpty(collectionNm)) {
+            return loadState(milvusClient, collectionName, partitionNames);
+        }
+        return loadState(milvusClient, collectionNm, partitionNames);
+    }
+
 
     private void addInternal(String id, Embedding embedding, TextSegment textSegment) {
         addAllInternal(

@@ -23,9 +23,9 @@ class MilvusEmbeddingStoreLocalIT extends EmbeddingStoreWithFilteringIT {
     private static final String COLLECTION_NAME = "test_collection";
     private static final String PARTITION_NAME = "test_partition";
 
-    private static final String MILVUS_HOSTS = "db-milvus-sit.d.tmtec.local";
+    private static final String MILVUS_HOSTS = "127.0.0.1";
     private static final Integer MILVUS_PORT = 19530;
-    private static final String MILVUS_DATABASENAME = "aggregation_LLM";
+    private static final String MILVUS_DATABASENAME = "test";
     private static final String MILVUS_USERNAME = "admin";
     private static final String MILVUS_PASSWORD = "admin";
 
@@ -244,7 +244,7 @@ class MilvusEmbeddingStoreLocalIT extends EmbeddingStoreWithFilteringIT {
         assertThat(embedding_ids_2).isNotNull();
         // search
         Embedding embedding_search = embeddingModel.embed("partition name").content();
-        System.out.println("初始化后 查询结果");
+        System.out.println("Initialize complete search");
         search(embedding_search, 4);
         search(embedding_search, 2, partitionName_1);
         search(embedding_search, 1, partitionName_2);
@@ -253,32 +253,32 @@ class MilvusEmbeddingStoreLocalIT extends EmbeddingStoreWithFilteringIT {
         embeddingStore.deleteByIds(null, asList(embedding_ids_def.get(0)));
         embeddingStore.deleteByIds(null, asList(embedding_ids_2.get(0)));
         // search
-        Thread.sleep(1000); // 注意：删除执行后要等待删除完成再查询，不然会查询到已经删除的数据。在实际业务中可以忽略。
-        System.out.println("删除id后 查询结果");
+        Thread.sleep(1000); // Note: After the deletion is executed, you must wait for the deletion to complete before querying, otherwise the deleted data will be queried. It can be ignored in actual business.
+        System.out.println("Delete By ID complete search");
         search(embedding_search, 1);
         search(embedding_search, 1, partitionName_1);
         search(embedding_search, 1, partitionName_1, partitionName_2);
         // insert and search
         List<String> embedding_ids_2_ = embeddingStore.addAll(asList(embedding_2_1), partitionName_2);
         assertThat(embedding_ids_2_).isNotNull();
-        System.out.println("再次对partition2新增后 查询结果");
+        System.out.println("again insert to partition2 search");
         search(embedding_search, 1, partitionName_2);
         search(embedding_search, 2);
         search(embedding_search, 1, partitionName_1);
         // delete partition
         embeddingStore.deletePartition(partitionName_2);
-        System.out.println("删除partition2后 查询结果");
+        System.out.println("delete partitionName complete search");
         search(embedding_search, 0, partitionName_2);
         search(embedding_search, 1);
         search(embedding_search, 1, partitionName_1);
         // delete collection collection_c2249186e1c94332b78e08d8a8fc92eb
-
+        embeddingStore.dropCollection(COLLECTION_NAME);
         System.out.println("success");
     }
 
     private void search(Embedding referenceEmbedding, Integer result_size, String... partitionNames) {
-        // 推荐2：partitionNames中的partition需要校验是否存在
-        // 推荐1：如果collection有且只有一个partition 搜索之前判断partition中是否存在数据 尽可能避免异常: Caused by: io.milvus.exception.ServerException: empty expression should be used with limit
+        // Recommendation 2: The partition in partitionNames needs to be verified to exist.
+        // Recommendation 1: If the collection has and has only one partition, determine whether there is data in the partition before searching and avoid exceptions as much as possible: Caused by: io.milvus.exception.ServerException: empty expression should be used with limit
         List<EmbeddingMatch<TextSegment>> relevant;
         if (partitionNames != null && partitionNames.length > 0) {
             relevant = embeddingStore.search(EmbeddingSearchRequest.builder().queryEmbedding(referenceEmbedding).maxResults(10).minScore(0.0).build(), asList(partitionNames)).matches();
