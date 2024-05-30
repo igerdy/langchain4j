@@ -1,5 +1,29 @@
 package dev.langchain4j.store.embedding.milvus;
 
+import dev.langchain4j.data.document.Metadata;
+import dev.langchain4j.data.embedding.Embedding;
+import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.internal.Utils;
+import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
+import dev.langchain4j.store.embedding.EmbeddingSearchResult;
+import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.filter.Filter;
+import io.milvus.client.MilvusServiceClient;
+import io.milvus.common.clientenum.ConsistencyLevelEnum;
+import io.milvus.grpc.GetLoadStateResponse;
+import io.milvus.param.ConnectParam;
+import io.milvus.param.IndexType;
+import io.milvus.param.MetricType;
+import io.milvus.param.dml.InsertParam;
+import io.milvus.param.dml.SearchParam;
+import io.milvus.response.SearchResultsWrapper;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import static dev.langchain4j.internal.Utils.getOrDefault;
 import static dev.langchain4j.internal.ValidationUtils.ensureNotNull;
 import static dev.langchain4j.store.embedding.milvus.CollectionOperationsExecutor.*;
@@ -11,26 +35,6 @@ import static io.milvus.param.IndexType.FLAT;
 import static io.milvus.param.MetricType.COSINE;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-
-import dev.langchain4j.data.document.Metadata;
-import dev.langchain4j.data.embedding.Embedding;
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.internal.Utils;
-import dev.langchain4j.store.embedding.EmbeddingMatch;
-import dev.langchain4j.store.embedding.EmbeddingSearchResult;
-import dev.langchain4j.store.embedding.EmbeddingStore;
-import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
-import dev.langchain4j.store.embedding.filter.Filter;
-import io.milvus.client.MilvusServiceClient;
-import io.milvus.common.clientenum.ConsistencyLevelEnum;
-import io.milvus.param.ConnectParam;
-import io.milvus.param.IndexType;
-import io.milvus.param.MetricType;
-import io.milvus.param.dml.InsertParam;
-import io.milvus.param.dml.SearchParam;
-import io.milvus.response.SearchResultsWrapper;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represents an <a href="https://milvus.io/">Milvus</a> index as an embedding store.
@@ -98,6 +102,12 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     CollectionOperationsExecutor.dropCollection(milvusClient, collectionName);
   }
 
+  public void createPartition(String partitionName) {
+    if (StringUtils.isNotEmpty(partitionName) && !hasPartition(this.milvusClient, this.collectionName, partitionName)) {
+      CollectionOperationsExecutor.createPartition(this.milvusClient, this.collectionName, partitionName);
+    }
+  }
+
   public String add(Embedding embedding) {
     String id = Utils.randomUUID();
     add(id, embedding);
@@ -116,21 +126,54 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
 
   public List<String> addAll(List<Embedding> embeddings) {
     List<String> ids = generateRandomIds(embeddings.size());
-    addAllInternal(ids, embeddings, null);
+    addAllInternal(ids, embeddings, null, null);
     return ids;
   }
 
   public List<String> addAll(List<Embedding> embeddings, List<TextSegment> embedded) {
     List<String> ids = generateRandomIds(embeddings.size());
-    addAllInternal(ids, embeddings, embedded);
+    addAllInternal(ids, embeddings, embedded, null);
+    return ids;
+  }
+
+  public String add(Embedding embedding, String partitionName) {
+    String id = Utils.randomUUID();
+    add(id, embedding, partitionName);
+    return id;
+  }
+
+  public void add(String id, Embedding embedding, String partitionName) {
+    addInternal(id, embedding, null, partitionName);
+  }
+
+  public String add(Embedding embedding, TextSegment textSegment, String partitionName) {
+    String id = Utils.randomUUID();
+    addInternal(id, embedding, textSegment, partitionName);
+    return id;
+  }
+
+  public List<String> addAll(List<Embedding> embeddings, String partitionName) {
+    List<String> ids = generateRandomIds(embeddings.size());
+    addAllInternal(ids, embeddings, null, partitionName);
+    return ids;
+  }
+
+  public List<String> addAll(List<Embedding> embeddings, List<TextSegment> embedded, String partitionName) {
+    List<String> ids = generateRandomIds(embeddings.size());
+    addAllInternal(ids, embeddings, embedded, partitionName);
     return ids;
   }
 
   @Override
   public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest embeddingSearchRequest) {
+    return this.search(embeddingSearchRequest, null);
+  }
+
+  public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest embeddingSearchRequest, List<String> partitionNames) {
 
     SearchParam searchParam = buildSearchRequest(
             collectionName,
+            partitionNames,
             embeddingSearchRequest.queryEmbedding().vectorAsList(),
             embeddingSearchRequest.filter(),
             embeddingSearchRequest.maxResults(),
@@ -155,22 +198,81 @@ public class MilvusEmbeddingStore implements EmbeddingStore<TextSegment> {
     return new EmbeddingSearchResult<>(result);
   }
 
+  public void deleteByIds(String partitionName, List<String> primaryIds) {
+    delete(milvusClient, collectionName, partitionName, primaryIds);
+  }
+
+  public void releaseCollection() {
+    if (!hasCollection(milvusClient, collectionName)) {
+      return;
+    }
+    releaseCollectionInMemory(milvusClient, collectionName);
+  }
+
+  public void loadCollection() {
+    if (!hasCollection(milvusClient, collectionName)) {
+      return;
+    }
+    loadCollectionInMemory(milvusClient, collectionName);
+  }
+
+  public void dropCollection() {
+    if (!hasCollection(milvusClient, collectionName)) {
+      return;
+    }
+    dropCollection(collectionName);
+  }
+
+  public void deletePartition(String partitionName) {
+    if (!hasPartition(milvusClient, collectionName, partitionName)) {
+      return;
+    }
+    releasePartitionsInMemory(milvusClient, collectionName, Collections.singletonList(partitionName));
+    dropPartition(milvusClient, collectionName, partitionName);
+  }
+
+  public void flushCollection() {
+    flush(milvusClient, collectionName);
+  }
+
+  public GetLoadStateResponse getLoadState(List<String> partitionNames) {
+    return this.getLoadState(collectionName, partitionNames);
+  }
+
+  public GetLoadStateResponse getLoadState(String collectionNm, List<String> partitionNames) {
+    if (StringUtils.isEmpty(collectionNm)) {
+      return loadState(milvusClient, collectionName, partitionNames);
+    }
+    return loadState(milvusClient, collectionNm, partitionNames);
+  }
+
+
   private void addInternal(String id, Embedding embedding, TextSegment textSegment) {
     addAllInternal(
       singletonList(id),
       singletonList(embedding),
-      textSegment == null ? null : singletonList(textSegment)
+      textSegment == null ? null : singletonList(textSegment),
+      null
     );
   }
 
-  private void addAllInternal(List<String> ids, List<Embedding> embeddings, List<TextSegment> textSegments) {
+  private void addInternal(String id, Embedding embedding, TextSegment textSegment, String partitionName) {
+    addAllInternal(
+      singletonList(id),
+      singletonList(embedding),
+      textSegment == null ? null : singletonList(textSegment),
+      partitionName
+    );
+  }
+
+  private void addAllInternal(List<String> ids, List<Embedding> embeddings, List<TextSegment> textSegments, String partitionName) {
     List<InsertParam.Field> fields = new ArrayList<>();
     fields.add(new InsertParam.Field(ID_FIELD_NAME, ids));
     fields.add(new InsertParam.Field(TEXT_FIELD_NAME, toScalars(textSegments, ids.size())));
     fields.add(new InsertParam.Field(METADATA_FIELD_NAME, toMetadataJsons(textSegments, ids.size())));
     fields.add(new InsertParam.Field(VECTOR_FIELD_NAME, toVectors(embeddings)));
 
-    insert(milvusClient, collectionName, fields);
+    insert(milvusClient, collectionName, fields, partitionName);
     flush(milvusClient, collectionName);
   }
 
