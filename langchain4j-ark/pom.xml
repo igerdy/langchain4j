@@ -14,6 +14,7 @@
 
     <artifactId>langchain4j-ark</artifactId>
     <name>LangChain4j :: Integration :: ark</name>
+    <version>0.33.0-plus-SNAPSHOT</version>
 
     <properties>
         <skipArkITs>false</skipArkITs>
@@ -24,6 +25,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-core</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>
@@ -63,6 +65,7 @@
         <dependency>
             <groupId>dev.langchain4j</groupId>
             <artifactId>langchain4j-core</artifactId>
+            <version>${project.parent.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>
@@ -101,5 +104,17 @@
             <comments>A business-friendly OSS license</comments>
         </license>
     </licenses>
+
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>Nexus Releases Repository Pro</name>
+            <url>http://nex-dvo.tmtec.sh:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <url>http://nex-dvo.tmtec.sh:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>
