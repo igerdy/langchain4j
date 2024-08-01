@@ -1,22 +1,18 @@
 package dev.langchain4j.model.ark;
 
+import com.volcengine.ark.runtime.model.completion.chat.*;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
-import com.volcengine.ark.runtime.model.completion.chat.ChatCompletionChoice;
-import com.volcengine.ark.runtime.model.completion.chat.ChatCompletionChunk;
-import com.volcengine.ark.runtime.model.completion.chat.ChatCompletionResult;
-import com.volcengine.ark.runtime.model.completion.chat.ChatFunction;
-import com.volcengine.ark.runtime.model.completion.chat.ChatFunctionCall;
-import com.volcengine.ark.runtime.model.completion.chat.ChatMessageRole;
-import com.volcengine.ark.runtime.model.completion.chat.ChatTool;
-import com.volcengine.ark.runtime.model.completion.chat.ChatToolCall;
-
 import dev.langchain4j.agent.tool.ToolParameters;
 import dev.langchain4j.agent.tool.ToolSpecification;
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.output.FinishReason;
 import dev.langchain4j.model.output.TokenUsage;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static dev.langchain4j.internal.Utils.isNullOrEmpty;
@@ -40,12 +36,14 @@ class ArkHelper {
                 .content(toSingleText(message));
 
         if (message instanceof AiMessage) {
-            List<ToolExecutionRequest> toolExecutionRequests = ((AiMessage) message).toolExecutionRequests();
-            List<ChatToolCall> toolCalls = toolExecutionRequests.stream()
-                    .map(toolexec -> new ChatToolCall(toolexec.id(), "function", new ChatFunctionCall(toolexec.name(), toolexec.arguments())))
-                    .collect(toList());
-            builder.toolCalls(toolCalls);
-            builder.toolCallId(toolCalls.stream().map(ChatToolCall::getId).collect(Collectors.joining()));
+            if (((AiMessage) message).hasToolExecutionRequests()) {
+                List<ToolExecutionRequest> toolExecutionRequests = ((AiMessage) message).toolExecutionRequests();
+                List<ChatToolCall> toolCalls = toolExecutionRequests.stream()
+                        .map(toolexec -> new ChatToolCall(toolexec.id(), "function", new ChatFunctionCall(toolexec.name(), toolexec.arguments())))
+                        .collect(toList());
+                builder.toolCalls(toolCalls);
+                builder.toolCallId(toolCalls.stream().map(ChatToolCall::getId).collect(Collectors.joining()));
+            }
         } else if (message instanceof ToolExecutionResultMessage) {
             ToolExecutionResultMessage toolExecutionResultMessage = (ToolExecutionResultMessage) message;
             builder.toolCallId(toolExecutionResultMessage.id());
