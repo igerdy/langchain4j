@@ -31,6 +31,7 @@
         <dependency>
             <groupId>com.volcengine</groupId>
             <artifactId>volcengine-java-sdk-ark-runtime</artifactId>
+            <version>0.1.119</version>
         </dependency>
 
         <dependency>
