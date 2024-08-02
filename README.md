@@ -1,3 +1,8 @@
+- 在LangChain4j的基础上对milvus进行增强。
+- 集成了opencat提供的ark模型，支持doubao模型。
+
+
+
 # LangChain for Java: Supercharge your Java application with the power of LLMs
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/langchain4j/langchain4j/main.yaml?branch=main&style=for-the-badge&label=GITHUB%20ACTIONS&logo=github)](https://github.com/langchain4j/langchain4j/actions/workflows/main.yaml)
