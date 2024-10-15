@@ -106,4 +106,16 @@
         </license>
     </licenses>
 
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>Nexus Releases Repository Pro</name>
+            <url>http://nex-dvo.tmtec.sh:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <url>http://nex-dvo.tmtec.sh:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 </project>
