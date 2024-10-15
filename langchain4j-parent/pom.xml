@@ -482,18 +482,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.2.1</version>
@@ -566,6 +554,10 @@
     </scm>
 
     <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <url>http://nex-dvo.tmtec.sh:8081/repository/maven-releases</url>
+        </repository>
         <snapshotRepository>
             <id>maven-snapshots</id>
             <url>http://nex-dvo.tmtec.sh:8081/repository/maven-snapshots</url>
@@ -574,11 +566,8 @@
 
     <repositories>
         <repository>
-            <id>maven-releases</id>
-            <url>http://nex-dvo.tmtec.sh:8081/repository/maven-releases</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <id>maven-public</id>
+            <url>http://nex-dvo.tmtec.sh:8081/repository/maven-public</url>
         </repository>
     </repositories>
 
