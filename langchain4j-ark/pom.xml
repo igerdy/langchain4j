@@ -14,7 +14,7 @@
 
     <artifactId>langchain4j-ark</artifactId>
     <name>LangChain4j :: Integration :: Volcengine Ark</name>
-    <version>0.35.0-plus-SNAPSHOT</version>
+    <version>0.35.0-plus</version>
 
     <properties>
         <skipArkITs>false</skipArkITs>
