@@ -53,7 +53,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.outputTimestamp>1714382357</project.build.outputTimestamp>
-        <argLine></argLine>
+        <argLine/>
         <!-- Dependency Versions -->
         <openai4j.version>0.25.0</openai4j.version>
         <azure-ai-openai.version>1.0.0-beta.13</azure-ai-openai.version>
@@ -61,7 +61,7 @@
         <azure.storage-blob.version>12.29.0</azure.storage-blob.version>
         <azure.storage-common.version>12.28.0</azure.storage-common.version>
         <azure.identity.version>1.14.2</azure.identity.version>
-        <retrofit.version>2.9.0</retrofit.version>
+        <retrofit.version>2.11.0</retrofit.version>
         <okhttp.version>4.12.0</okhttp.version>
         <jtokkit.version>1.1.0</jtokkit.version>
         <langchain4j-embeddings.version>${project.version}</langchain4j-embeddings.version>
@@ -690,8 +690,8 @@
                         </goals>
                         <configuration>
                             <rules>
-                                <banDuplicatePomDependencyVersions></banDuplicatePomDependencyVersions>
-                                <dependencyConvergence></dependencyConvergence>
+                                <banDuplicatePomDependencyVersions/>
+                                <dependencyConvergence/>
                                 <requireMavenVersion>
                                     <version>3.8</version>
                                 </requireMavenVersion>
